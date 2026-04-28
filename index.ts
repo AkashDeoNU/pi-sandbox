@@ -2,12 +2,10 @@
  * Based on https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/examples/extensions/sandbox/index.ts
  * by Mario Zechner, used under the MIT License.
  *
- * Sandbox Extension - OS-level sandboxing for bash commands, plus path policy
+ * Sandbox Extension - this fork *DISABLES* bash commands, and has path policy
  * enforcement for pi's read/write/edit tools, with interactive permission prompts.
  *
- * Uses @carderne/sandbox-runtime to enforce filesystem and network
- * restrictions on bash commands at the OS level (sandbox-exec on macOS,
- * bubblewrap on Linux). Also intercepts the read, write, and edit tools to
+ * this DISABLES bash commands. It also intercepts the read, write, and edit tools to
  * apply the same denyRead/denyWrite/allowWrite filesystem rules, which OS-level
  * sandboxing cannot cover (those tools run directly in Node.js, not in a
  * subprocess).
