@@ -513,64 +513,64 @@ export default function (pi: ExtensionAPI) {
 
   // ── Bash tool — with write-block detection and retry ───────────────────────
 
-  pi.registerTool({
-    ...localBash,
-    label: "bash (sandboxed)",
-    async execute(id, params, signal, onUpdate, ctx) {
-      const runBash = () => {
-        if (!sandboxEnabled || !sandboxInitialized) {
-          return localBash.execute(id, params, signal, onUpdate);
-        }
-        const sandboxedBash = createBashTool(localCwd, {
-          operations: createSandboxedBashOps(),
-        });
-        return sandboxedBash.execute(id, params, signal, onUpdate);
-      };
-
-      const result = await runBash();
-
-      // Post-execution: detect OS-level write block and offer to allow.
-      if (sandboxEnabled && sandboxInitialized && ctx?.hasUI) {
-        const outputText = result.content
-          .filter((c: any) => c.type === "text")
-          .map((c: any) => c.text)
-          .join("\n");
-
-        const blockedPath = extractBlockedWritePath(outputText);
-        if (blockedPath) {
-          const choice = await promptWriteBlock(ctx, blockedPath);
-          if (choice !== "abort") {
-            await applyWriteChoice(choice, blockedPath, ctx.cwd);
-
-            // Check if denyWrite would still block it even after allowing.
-            const config = loadConfig(ctx.cwd);
-            const { projectPath, globalPath } = getConfigPaths(ctx.cwd);
-            if (matchesPattern(blockedPath, config.filesystem?.denyWrite ?? [])) {
-              ctx.ui.notify(
-                `⚠️ "${blockedPath}" was added to allowWrite, but it is also in denyWrite and will remain blocked.\n` +
-                  `Check denyWrite in:\n  ${projectPath}\n  ${globalPath}`,
-                "warning",
-              );
-              return result;
-            }
-
-            onUpdate?.({
-              content: [
-                {
-                  type: "text",
-                  text: `\n--- Write access granted for "${blockedPath}", retrying ---\n`,
-                },
-              ],
-              details: {},
-            });
-            return runBash();
-          }
-        }
-      }
-
-      return result;
-    },
-  });
+	// pi.registerTool({
+	//   ...localBash,
+	//   label: "bash (sandboxed)",
+	//   async execute(id, params, signal, onUpdate, ctx) {
+	//     const runBash = () => {
+	//       if (!sandboxEnabled || !sandboxInitialized) {
+	//         return localBash.execute(id, params, signal, onUpdate);
+	//       }
+	//       const sandboxedBash = createBashTool(localCwd, {
+	//         operations: createSandboxedBashOps(),
+	//       });
+	//       return sandboxedBash.execute(id, params, signal, onUpdate);
+	//     };
+	// 
+	//     const result = await runBash();
+	// 
+	//     // Post-execution: detect OS-level write block and offer to allow.
+	//     if (sandboxEnabled && sandboxInitialized && ctx?.hasUI) {
+	//       const outputText = result.content
+	//         .filter((c: any) => c.type === "text")
+	//         .map((c: any) => c.text)
+	//         .join("\n");
+	// 
+	//       const blockedPath = extractBlockedWritePath(outputText);
+	//       if (blockedPath) {
+	//         const choice = await promptWriteBlock(ctx, blockedPath);
+	//         if (choice !== "abort") {
+	//           await applyWriteChoice(choice, blockedPath, ctx.cwd);
+	// 
+	//           // Check if denyWrite would still block it even after allowing.
+	//           const config = loadConfig(ctx.cwd);
+	//           const { projectPath, globalPath } = getConfigPaths(ctx.cwd);
+	//           if (matchesPattern(blockedPath, config.filesystem?.denyWrite ?? [])) {
+	//             ctx.ui.notify(
+	//               `⚠️ "${blockedPath}" was added to allowWrite, but it is also in denyWrite and will remain blocked.\n` +
+	//                 `Check denyWrite in:\n  ${projectPath}\n  ${globalPath}`,
+	//               "warning",
+	//             );
+	//             return result;
+	//           }
+	// 
+	//           onUpdate?.({
+	//             content: [
+	//               {
+	//                 type: "text",
+	//                 text: `\n--- Write access granted for "${blockedPath}", retrying ---\n`,
+	//               },
+	//             ],
+	//             details: {},
+	//           });
+	//           return runBash();
+	//         }
+	//       }
+	//     }
+	// 
+	//     return result;
+	//   },
+	// });
 
   // ── user_bash — network pre-check ──────────────────────────────────────────
 
